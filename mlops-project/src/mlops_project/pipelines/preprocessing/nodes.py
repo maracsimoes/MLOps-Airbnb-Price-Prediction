@@ -12,7 +12,7 @@ def split_data_node(df, target_col='price'):
     
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    return X_train, X_val, y_train, y_val
+    return X_train, X_val, y_train.to_frame(), y_val.to_frame()
 
 
 def identify_data_types_node(df: pd.DataFrame):
@@ -41,11 +41,12 @@ def handle_missing_values_node(X_train, X_val, y_train, y_val,
             if col in X_val.columns:
                 X_val[col] = X_val[col].fillna(mode_val)
 
-    median_y = y_train.median() 
-    if y_train.isnull().any():
+    median_y = y_train.median().item()  # se for DataFrame de uma coluna só
+
+    if y_train.isnull().values.any():
         y_train = y_train.fillna(median_y)
 
-    if y_val.isnull().any():
+    if y_val.isnull().values.any():
         y_val = y_val.fillna(median_y)
 
 
