@@ -1,0 +1,30 @@
+typed_data:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/typed_data.parquet
+
+features_data:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/features_data.parquet
+
+X_train:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_train.parquet
+
+X_val:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_val.parquet
+
+y_train:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/y_train.parquet
+
+y_val:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/y_val.parquet
+
+trained_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/linear_regression_model.pkl
+
+val_metrics:
+  type: MemoryDataset
