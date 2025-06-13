@@ -15,7 +15,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         node(
             func=feature_engineering,
             inputs="typed_data",
-            outputs="preprocessed_data",
+            outputs="features_data",
             name="feature_engineering_node",
         )
     ])

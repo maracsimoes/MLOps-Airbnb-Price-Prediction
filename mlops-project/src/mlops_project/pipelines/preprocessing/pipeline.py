@@ -15,7 +15,7 @@ def create_pipeline(**kwargs):
 
             node(
                 func=split_data_node,
-                inputs=["preprocessed_data", "params:target_col"],
+                inputs=["features_data", "params:target_col"],
                 outputs=["X_train", "X_val", "y_train", "y_val"],
                 name="split_data_node"
             ),
