@@ -64,98 +64,107 @@ def get_validation_results(checkpoint_result):
         
     return df_validation
 
+def test_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Validate the *raw* listings dataset with Great Expectations.
 
+    1. Create / update a suite called ``ListingsRaw``.
+    2. Run an in‑memory checkpoint.
+    3. Fail Kedro run if critical assertions are violated.
+    4. Return a DataFrame summarising each expectation.
+    """
+    # GX context 
+    context = gx.get_context(context_root_dir="gx")
 
-#DAQUI PARA CIMA TUDO OK!
+    # Register / update a pandas datasource
+    datasource = context.sources.add_or_update_pandas("listings_ds")
 
+    # Build or refresh expectation suite
+    suite = context.add_or_update_expectation_suite("ListingsRaw")
 
-
-
-#DAQUI PARA BAIXO TEMOS DE ADAPTAR PARA O NOSSO PROJETO:
-
-
-
-
-
-
-def test_data(df):
-    context = gx.get_context(context_root_dir = "//..//..//gx")
-    datasource_name = "bank_datasource"
-    try:
-        datasource = context.sources.add_pandas(datasource_name)
-        logger.info("Data Source created.")
-    except:
-        logger.info("Data Source already exists.")
-        datasource = context.datasources[datasource_name]
-
-    suite_bank = context.add_or_update_expectation_suite(expectation_suite_name="Bank")
-    
-    #add more expectations to your data
-    expectation_marital = ExpectationConfiguration(
-    expectation_type="expect_column_distinct_values_to_be_in_set",
-    kwargs={
-        "column": "marital",
-        "value_set" : ['married', 'single', 'divorced']
-    },
+    # a) Primary‑key column
+    suite.add_expectation(
+        ExpectationConfiguration(
+            "expect_column_values_to_not_be_null",
+            kwargs={"column": "listing_id"},
         )
-    suite_bank.add_expectation(expectation_configuration=expectation_marital)
-
-    expectation_balance = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_between",
-        kwargs={
-            "column": "balance",
-            "max_value": 105000,
-            "min_value": 0
-        },
     )
-    suite_bank.add_expectation(expectation_configuration=expectation_balance)
-
-    expectation_age = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_between",
-        kwargs={
-            "column": "age",
-            "max_value": 100,
-            "min_value": 18
-        },
+    suite.add_expectation(
+        ExpectationConfiguration(
+            "expect_column_values_to_be_unique",
+            kwargs={"column": "listing_id"},
+        )
     )
-    suite_bank.add_expectation(expectation_configuration=expectation_age)
 
+    # b) Price & nights ranges
+    suite.add_expectation(
+        ExpectationConfiguration(
+            "expect_column_values_to_be_between",
+            kwargs={"column": "price", "min_value": 1, "max_value": 500},
+        )
+    )
+    suite.add_expectation(
+        ExpectationConfiguration(
+            "expect_column_values_to_be_between",
+            kwargs={"column": "minimum_nights", "min_value": 1, "max_value": 40},
+        )
+    )
+    suite.add_expectation(
+        ExpectationConfiguration(
+            "expect_column_values_to_be_between",
+            kwargs={"column": "maximum_nights", "min_value": 1, "max_value": 1150},
+        )
+    )
 
-    context.add_or_update_expectation_suite(expectation_suite=suite_bank)
-
-    data_asset_name = "test"
-    try:
-        data_asset = datasource.add_dataframe_asset(name=data_asset_name, dataframe= df)
-    except:
-        logger.info("The data asset alread exists. The required one will be loaded.")
-        data_asset = datasource.get_asset(data_asset_name)
-
-    batch_request = data_asset.build_batch_request(dataframe= df)
-
-
-    checkpoint = gx.checkpoint.SimpleCheckpoint(
-        name="checkpoint_marital",
-        data_context=context,
-        validations=[
-            {
-                "batch_request": batch_request,
-                "expectation_suite_name": "Bank",
+    # c) Bedrooms (nullable, but when present ≤ 10)
+    suite.add_expectation(
+        ExpectationConfiguration(
+            "expect_column_values_to_be_between",
+            kwargs={
+                "column": "bedrooms",
+                "min_value": 0,
+                "max_value": 10,
+                "ignore_row_if": "either_value_is_missing",
             },
-        ],
+        )
     )
-    checkpoint_result = checkpoint.run()
 
-    df_validation = get_validation_results(checkpoint_result)
-    #base on these results you can make an assert to stop your pipeline
+    # d) Boolean flags only True / False
+    for bcol in [
+        "host_is_superhost",
+        "host_has_profile_pic",
+        "host_identity_verified",
+        "instant_bookable",
+    ]:
+        if bcol in df.columns:
+            suite.add_expectation(
+                ExpectationConfiguration(
+                    "expect_column_values_to_match_regex",
+                    kwargs={"column": bcol, "regex": "^(True|False)$"},
+                )
+            )
 
-    pd_df_ge = gx.from_pandas(df)
+    # Persist suite
+    context.add_or_update_expectation_suite(suite)
 
-    assert pd_df_ge.expect_column_values_to_be_of_type("duration", "int64").success == True
-    assert pd_df_ge.expect_column_values_to_be_of_type("marital", "str").success == True
-    #assert pd_df_ge.expect_table_column_count_to_equal(23).success == False
+    # Build batch & checkpoint
+    asset   = datasource.add_dataframe_asset("in_memory", dataframe=df)
+    request = asset.build_batch_request(dataframe=df)
 
-    log = logging.getLogger(__name__)
-    log.info("Data passed on the unit data tests")
-  
+    ckpt = gx.checkpoint.SimpleCheckpoint(
+        name="ckpt_listings_raw",
+        data_context=context,
+        validations=[{"batch_request": request, "expectation_suite_name": "ListingsRaw"}],
+    )
+    ckpt_result = ckpt.run()
 
-    return df_validation
+    # Flatten results for reporting
+    validation_df = get_validation_results(ckpt_result)
+
+    # Hard‑stop assertions on critical schema
+    pd_ge = gx.from_pandas(df)
+    assert pd_ge.expect_column_values_to_be_of_type("listing_id", "int64").success
+    assert pd_ge.expect_column_values_to_be_of_type("price", "float64").success
+
+    logger.info(" Listings_paris.csv passed Great Expectations unit tests.")
+    return validation_df
