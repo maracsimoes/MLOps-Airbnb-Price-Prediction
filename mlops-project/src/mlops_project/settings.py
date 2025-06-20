@@ -44,21 +44,3 @@ CONFIG_LOADER_ARGS = {
 # Class that manages the Data Catalog.
 # from kedro.io import DataCatalog
 # DATA_CATALOG_CLASS = DataCatalog
-from mlops_project.pipelines import data_cleaning, feature_engineering, preprocessing, model_training, evaluation
-from kedro.pipeline import Pipeline
-
-PIPELINE_REGISTRY = {
-    "datacleaning": data_cleaning.create_pipeline(),
-    "featureengineering": feature_engineering.create_pipeline(),
-    "preprocessing": preprocessing.create_pipeline(),
-    "model_training": model_training.create_pipeline(),
-    "evaluation": evaluation.create_pipeline(),
-    "__default__": Pipeline([
-        data_cleaning.create_pipeline(),
-        feature_engineering.create_pipeline(),
-        preprocessing.create_pipeline(),
-        model_training.create_pipeline(),
-        evaluation.create_pipeline()
-    ])
-}
-

@@ -5,7 +5,7 @@ generated using Kedro 0.19.13
 
 from kedro.pipeline import Pipeline, node
 
-from .nodes import (change_data_types, clean_accommodates, keep_reasonable_bedroom_counts, keep_reasonable_prices, keep_reasonable_min_nights, keep_reasonable_max_nights, identify_data_types)
+from .nodes import (change_data_types, clean_accommodates, keep_reasonable_bedroom_counts, keep_reasonable_prices, keep_reasonable_min_nights, keep_reasonable_max_nights)
 
 
 def create_pipeline(**_):

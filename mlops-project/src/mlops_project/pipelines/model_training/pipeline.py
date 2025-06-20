@@ -1,20 +1,14 @@
-"""
-This is a boilerplate pipeline 'model_training'
-generated using Kedro 0.19.13
-"""
-
-
-from kedro.pipeline import node, Pipeline
-from .nodes import train_model_node
+from kedro.pipeline import Pipeline, node
+from .nodes import model_train
 
 def create_pipeline(**kwargs):
     return Pipeline(
         [
             node(
-                func=train_model_node,
-                inputs=["X_train_scaled", "y_train_imputed"],
-                outputs="trained_model",
-                name="train_model_node"
-            )
+                func=model_train,
+                inputs=["X_train", "X_test", "y_train", "y_test", "params:model_training", "best_columns"],
+                outputs=["model", "selected_features", "metrics", "shap_plot"],
+                name="model_training_node",
+            ),
         ]
     )

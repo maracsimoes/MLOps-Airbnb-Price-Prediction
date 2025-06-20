@@ -13,7 +13,7 @@ def create_pipeline(**kwargs):
             node(
                 func=evaluate_model_node,
                 inputs=["trained_model", "X_val_scaled", "y_val_imputed"],
-                outputs=["val_mae", "val_rmse", "shap_figure"],  # só se tens certeza que não é None
+                outputs=["val_mae", "val_rmse", "shap_figure"],  
                 name="evaluate_model_node"
             )
         ])

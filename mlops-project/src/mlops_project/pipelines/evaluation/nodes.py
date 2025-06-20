@@ -20,7 +20,7 @@ def evaluate_model_node(model, X_val, y_val):
 
         X_val = X_val.apply(pd.to_numeric, errors='coerce').fillna(0).replace([np.inf, -np.inf], 0).astype(np.float64)
 
-        rng = np.random.default_rng(seed=42)  # Gerador de números aleatórios explícito
+        rng = np.random.default_rng(seed=42)  
 
         explainer = shap.Explainer(model.predict, X_val, rng=rng)
         shap_values = explainer(X_val)

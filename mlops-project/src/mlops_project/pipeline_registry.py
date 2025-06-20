@@ -1,16 +1,42 @@
-"""Project pipelines."""
 from __future__ import annotations
-
-from kedro.framework.project import find_pipelines
 from kedro.pipeline import Pipeline
+
+from mlops_project.pipelines import (
+    data_cleaning,
+    data_unit_tests,
+    evaluation,
+    feature_engineering,
+    feature_selection,
+    model_predict,
+    model_selection,
+    model_training,
+    preprocessing,
+    split_data,
+    split_train_pipeline
+)
 
 
 def register_pipelines() -> dict[str, Pipeline]:
-    """Register the project's pipelines.
-
-    Returns:
-        A mapping from pipeline names to ``Pipeline`` objects.
-    """
-    pipelines = find_pipelines()
-    pipelines["__default__"] = sum(pipelines.values())
-    return pipelines
+    return {
+        "data_cleaning": data_cleaning.create_pipeline(),
+        "data_unit_tests": data_unit_tests.create_pipeline(),
+        "evaluation": evaluation.create_pipeline(),
+        "feature_engineering": feature_engineering.create_pipeline(),
+        "feature_selection": feature_selection.create_pipeline(),
+        "model_predict": model_predict.create_pipeline(),
+        "model_selection": model_selection.create_pipeline(),
+        "model_training": model_training.create_pipeline(),
+        "preprocessing": preprocessing.create_pipeline(),
+        "split_data": split_data.create_pipeline(),
+        "split_train_pipeline": split_train_pipeline.create_pipeline(),
+        "__default__": Pipeline([
+            data_cleaning.create_pipeline(),
+            feature_engineering.create_pipeline(),
+            preprocessing.create_pipeline(),
+            split_data.create_pipeline(),
+            model_training.create_pipeline(),
+            model_selection.create_pipeline(),
+            model_predict.create_pipeline(),
+            evaluation.create_pipeline()
+        ])
+    }

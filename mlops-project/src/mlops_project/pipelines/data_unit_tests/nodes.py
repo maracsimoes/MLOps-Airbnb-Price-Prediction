@@ -2,22 +2,20 @@
 This is a boilerplate pipeline
 generated using Kedro 0.18.8
 """
-
+import great_expectations as gx
 import logging
 from typing import Any, Dict, Tuple
 
 import numpy as np
 import pandas as pd
 
-from great_expectations.core import ExpectationSuite, ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 import great_expectations as gx
 
 from pathlib import Path
 
 from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
-
-
 
 logger = logging.getLogger(__name__)
 

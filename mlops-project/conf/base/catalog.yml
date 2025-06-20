@@ -1,4 +1,4 @@
-raw_data:
+listings_raw:
   type: pandas.CSVDataset
   filepath: data/01_raw/Listings_paris.csv
 
@@ -14,15 +14,15 @@ X_train:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/X_train.parquet
 
-X_val:
+X_test:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/X_val.parquet
 
 y_train:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/y_train.parquet
-
-y_val:
+  
+y_test:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/y_val.parquet
 
@@ -30,5 +30,41 @@ trained_model:
   type: pickle.PickleDataset
   filepath: data/06_models/linear_regression_model.pkl
 
+X_train_scaled:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_train_scaled.parquet
+
+X_val_scaled:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_val_scaled.parquet
+
+y_train_imputed:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/y_train.parquet
+
+y_val_imputed:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/y_val.parquet
+
+X_train_encoded:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_train_encoded.parquet
+
+X_val_encoded:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_val_encoded.parquet
+
 val_metrics:
   type: MemoryDataset
+
+production_model:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pickle.PickleDataset
+    filepath: data/06_models/production_model.pkl
+
+production_columns:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pickle.PickleDataset
+    filepath: data/06_models/production_cols.pkl
