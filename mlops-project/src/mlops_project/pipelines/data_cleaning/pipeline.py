@@ -3,22 +3,46 @@ This is a boilerplate pipeline 'data_cleaning'
 generated using Kedro 0.19.13
 """
 
-from kedro.pipeline import node, Pipeline, pipeline  # noqa
-from .nodes import change_data_types, remove_irrelevant_columns
+from kedro.pipeline import Pipeline, node
+
+from .nodes import (change_data_types, clean_accommodates, keep_reasonable_bedroom_counts, keep_reasonable_prices, keep_reasonable_min_nights, keep_reasonable_max_nights, identify_data_types)
 
 
-def create_pipeline(**kwargs) -> Pipeline:
-    return Pipeline([
-        node(
-            func=remove_irrelevant_columns,
-            inputs="raw_data",
-            outputs="filtered_data",
-            name="remove_irrelevant_columns_node",
-        ),
-        node(
-            func=change_data_types,
-            inputs="filtered_data",
-            outputs="typed_data",
-            name="change_data_types_node",
-        )
-    ])
+def create_pipeline(**_):
+    return Pipeline(
+        [
+            
+            node(
+                change_data_types,
+                inputs="listings_raw",
+                outputs="listings_typed",
+                name="cast_types",
+            ),
+            
+            node(clean_accommodates, "listings_pruned", "listings_accomm", name="fix_accommodates"),
+            node(
+                keep_reasonable_bedroom_counts,
+                "listings_accomm",
+                "listings_bedrooms",
+                name="filter_bedrooms",
+            ),
+            node(
+                keep_reasonable_prices,
+                "listings_bedrooms",
+                "listings_price",
+                name="filter_price",
+            ),
+            node(
+                keep_reasonable_min_nights,
+                "listings_price",
+                "listings_min_nights",
+                name="filter_min_nights",
+            ),
+            node(
+                keep_reasonable_max_nights,
+                "listings_min_nights",
+                "listings_clean",
+                name="filter_max_nights",
+            ),
+        ]
+    )
