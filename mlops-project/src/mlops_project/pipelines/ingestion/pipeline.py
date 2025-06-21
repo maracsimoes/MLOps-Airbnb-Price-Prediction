@@ -1,17 +1,17 @@
-from kedro.pipeline import Pipeline, node, pipeline
-
+from kedro.pipeline import node, pipeline
 from .nodes import ingestion
 
-def create_pipeline(**_) -> Pipeline:           
+def create_pipeline(**_) -> pipeline:
     return pipeline(
         [
             node(
                 func=ingestion,
                 inputs=[
-                    "listings_raw",        
-                    "listings_raw_extra",       
-                    "parameters"],
-                outputs="ingested_data",    
+                    "listings_raw",
+                    "listings_raw_extra@optional",   #optional extra dataset
+                    "parameters",
+                ],
+                outputs="ingested_data",
                 name="ingestion",
             ),
         ]

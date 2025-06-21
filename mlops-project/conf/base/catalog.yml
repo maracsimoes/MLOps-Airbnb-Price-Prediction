@@ -4,7 +4,7 @@ listings_raw:
 
 listings_raw_extra:
   type: pandas.CSVDataSet
-  filepath: data/01_raw/Listings_paris_extra.csv
+  filepath: data/01_raw/Listings_paris.csv
 
 typed_data:
   type: pandas.ParquetDataset
