@@ -19,7 +19,7 @@ def create_pipeline(**_):
                 name="cast_types",
             ),
             
-            node(clean_accommodates, "listings_pruned", "listings_accomm", name="fix_accommodates"),
+            node(clean_accommodates, "listings_typed", "listings_accomm", name="fix_accommodates"),
             node(
                 keep_reasonable_bedroom_counts,
                 "listings_accomm",

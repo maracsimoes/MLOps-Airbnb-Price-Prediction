@@ -3,7 +3,7 @@ listings_raw:
   filepath: data/01_raw/Listings_paris.csv
 
 listings_raw_extra:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/Listings_paris_extra.csv
 
 typed_data:
@@ -72,3 +72,43 @@ production_columns:
   dataset:
     type: pickle.PickleDataset
     filepath: data/06_models/production_cols.pkl
+
+preprocessed_batch_data:
+  type: kedro_datasets.pandas.ParquetDataset
+  filepath: data/03_primary/preprocessed_batch_data.parquet
+
+best_columns:
+  type: pickle.PickleDataset
+  filepath: data/06_models/best_columns.pkl
+
+ingested_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/ingested_data.csv
+
+listings_pruned:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_pruned.parquet
+
+listings_typed:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_typed.parquet
+
+listings_accomm:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_accomm.parquet
+
+listings_bedrooms:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_bedrooms.parquet
+
+listings_price:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_price.parquet
+
+listings_min_nights:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_min_nights.parquet
+
+listings_clean:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_clean.parquet

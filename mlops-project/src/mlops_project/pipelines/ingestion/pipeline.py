@@ -10,7 +10,7 @@ def create_pipeline(**_) -> Pipeline:
                 inputs=[
                     "listings_raw",        
                     "listings_raw_extra",       
-                    "parameters"],
+                    "params:target_col"],
                 outputs="ingested_data",    
                 name="ingestion",
             ),

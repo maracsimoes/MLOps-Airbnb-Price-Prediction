@@ -44,3 +44,8 @@ CONFIG_LOADER_ARGS = {
 # Class that manages the Data Catalog.
 # from kedro.io import DataCatalog
 # DATA_CATALOG_CLASS = DataCatalog
+
+from mlops_project.pipelines import register_pipelines
+
+PIPELINE_REGISTRY = register_pipelines()
+
