@@ -4,6 +4,8 @@ from typing import Any, Dict, Tuple
 import numpy as np
 import pandas as pd
 from typing import List   
+from typing import Optional
+from datetime import datetime
 
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration
 
@@ -227,46 +229,44 @@ def to_feature_store(
 
 def ingestion(
     df1: pd.DataFrame,
-    df2: pd.DataFrame,
+    df2: Optional[pd.DataFrame],          # ← df2 can be None (when @optional)
     parameters: Dict[str, Any],
 ) -> pd.DataFrame:
     """
-    Merge two raw DataFrames, deduplicate, timestamp, validate with GX,
-    and (optionally) push each column‑group to Hopsworks Feature Store.
+    Merge two raw DataFrames, deduplicate, add a timestamp, validate with
+    Great Expectations, and (optionally) push feature groups to Hopsworks.
 
-    Parameters
-    ----------
-    df1, df2 : pd.DataFrame
-        Two raw datasets that share at least one key column.
-    parameters : dict
-        Must include:
-        • target_column   – e.g. ``"price"``
-        • to_feature_store (bool)
-
-    Returns
-    -------
-    pd.DataFrame
-        The merged + cleaned full dataset.
+    Expected ``parameters`` keys
+    ----------------------------
+    target_column : str   e.g. "price"
+    to_feature_store : bool
     """
-    # 1. Merge on common columns
-    common_cols = [c for c in df1.columns if c in df2.columns]
-    assert common_cols, "DataFrames share no common columns — cannot merge."
-    df_full = pd.merge(df1, df2, how="left", on=common_cols).drop_duplicates()
-    logger.info("Merged on %s ⇒ shape %s", common_cols, df_full.shape)
+    # 1. Merge (if extra dataset present)
+    if df2 is None:
+        logger.info("No extra dataset supplied – continuing with df1 only.")
+        df_full = df1.copy()
+    else:
+        common_cols = [c for c in df1.columns if c in df2.columns]
+        if not common_cols:
+            raise ValueError("No common columns to merge on.")
+        logger.info("Merging on common columns: %s", common_cols)
+        df_full = (
+            pd.merge(df1, df2, how="left", on=common_cols)
+            .drop_duplicates()
+        )
 
     # 2. Identify feature groups
-    numerical_features = df_full.select_dtypes(
-        exclude=["object", "string", "category"]
-    ).columns.tolist()
-
+    numerical_features = (
+        df_full.select_dtypes(exclude=["object", "string", "category"])
+        .columns
+        .tolist()
+    )
     categorical_features = [
-        c for c in df_full.select_dtypes(
-            include=["object", "string", "category"]
-        ).columns
+        c for c in df_full.select_dtypes(include=["object", "string", "category"]).columns
         if c != parameters["target_column"]
     ]
 
-    # 3. Add a synthetic event‑time column (1st of each month 2024)
+    # 3. Add synthetic event‑time column
     months_int = {
         "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
         "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
@@ -274,26 +274,26 @@ def ingestion(
     df_full = df_full.reset_index()
     df_full["datetime"] = pd.to_datetime(
         {
-            "year": 2025,
+            "year": datetime.now().year,
             "month": df_full["month"].map(months_int),
             "day": 1,
         }
     )
 
-    # 4. Build Great Expectations suites
-    suite_num   = build_expectation_suite("numerical_expectations",   "numerical_features")
-    suite_cat   = build_expectation_suite("categorical_expectations", "categorical_features")
-    suite_target = build_expectation_suite("target_expectations",    "target")
+    # 4. Build GX expectation suites
+    suite_num    = build_expectation_suite("numerical_expectations",   "numerical_features")
+    suite_cat    = build_expectation_suite("categorical_expectations", "categorical_features")
+    suite_target = build_expectation_suite("target_expectations",      "target")
 
-    # 5. Split DataFrames by group
+    # 5. Slice DataFrames by group
     df_num    = df_full[["index", "datetime"] + numerical_features]
     df_cat    = df_full[["index", "datetime"] + categorical_features]
     df_target = df_full[["index", "datetime", parameters["target_column"]]]
 
-    # 6. Push to Hopsworks Feature Store 
+    # 6. Optional: push to Hopsworks Feature Store
     if parameters.get("to_feature_store", False):
+        logger.info("Uploading feature groups to Hopsworks …")
 
-        # → Numerical group
         to_feature_store(
             data=df_num,
             group_name="numerical_features",
@@ -306,7 +306,6 @@ def ingestion(
             event_time="datetime",
         )
 
-        # → Categorical group
         to_feature_store(
             data=df_cat,
             group_name="categorical_features",
@@ -319,7 +318,6 @@ def ingestion(
             event_time="datetime",
         )
 
-        # → Target column
         to_feature_store(
             data=df_target,
             group_name="target_features",
@@ -334,4 +332,5 @@ def ingestion(
             event_time="datetime",
         )
 
+    logger.info("Ingestion completed – final shape: %s", df_full.shape)
     return df_full
