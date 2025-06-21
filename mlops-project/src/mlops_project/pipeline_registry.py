@@ -11,6 +11,7 @@ from mlops_project.pipelines import (
     model_selection,
     model_training,
     preprocessing,
+    preprocessing_batch,
     split_data,
     split_train_pipeline
 )
@@ -27,12 +28,14 @@ def register_pipelines() -> dict[str, Pipeline]:
         "model_selection": model_selection.create_pipeline(),
         "model_training": model_training.create_pipeline(),
         "preprocessing": preprocessing.create_pipeline(),
+        "preprocessing_batch": preprocessing_batch.create_pipeline(),
         "split_data": split_data.create_pipeline(),
         "split_train_pipeline": split_train_pipeline.create_pipeline(),
         "__default__": Pipeline([
             data_cleaning.create_pipeline(),
             feature_engineering.create_pipeline(),
             preprocessing.create_pipeline(),
+            preprocessing_batch.create_pipeline(),
             split_data.create_pipeline(),
             model_training.create_pipeline(),
             model_selection.create_pipeline(),

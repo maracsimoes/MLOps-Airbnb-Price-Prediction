@@ -1,6 +1,4 @@
-"""
-This is a boilerplate pipeline 'preprocessing_train'
-"""
+
 from kedro.pipeline import Pipeline, node
 
 from .nodes import (change_data_types, clean_accommodates, keep_reasonable_bedroom_counts, keep_reasonable_prices, keep_reasonable_min_nights, keep_reasonable_max_nights)
@@ -13,7 +11,7 @@ def create_pipeline(**_):
             node(
                 change_data_types,
                 inputs="listings_raw",
-                outputs="listings_typed",
+                outputs="listings_typedV2train",
                 name="cast_types",
             ),
             
