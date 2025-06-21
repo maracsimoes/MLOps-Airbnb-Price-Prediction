@@ -2,6 +2,10 @@ listings_raw:
   type: pandas.CSVDataset
   filepath: data/01_raw/Listings_paris.csv
 
+listings_raw_extra:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/Listings_paris_extra.csv
+
 typed_data:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/typed_data.parquet

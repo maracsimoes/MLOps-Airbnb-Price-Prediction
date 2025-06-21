@@ -1,0 +1,2 @@
+target_column: price
+to_feature_store: false
