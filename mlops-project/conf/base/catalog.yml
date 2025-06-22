@@ -14,21 +14,18 @@ X_train:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/X_train.parquet
 
-X_test:
+X_val:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/X_val.parquet
 
 y_train:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/y_train.parquet
-  
-y_test:
+
+y_val:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/y_val.parquet
 
-trained_model:
-  type: pickle.PickleDataset
-  filepath: data/06_models/linear_regression_model.pkl
 
 X_train_scaled:
   type: pandas.ParquetDataset
@@ -56,6 +53,10 @@ X_val_encoded:
 
 val_metrics:
   type: MemoryDataset
+
+fitted_rfe:
+  type: pickle.PickleDataset
+  filepath: data/06_models/fitted_rfe.pkl
 
 production_model:
   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset

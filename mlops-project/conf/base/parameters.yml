@@ -1,7 +1,8 @@
 target_col: price
 to_feature_store: false
 
-feature_selection: rfe
+feature_selection: 
+  method: rfe
 
 baseline_model_params:
   n_estimators: 100
@@ -25,23 +26,18 @@ model_selection:
       max_depth: [3, 5]
 
 model_training:
-  model_type: random_forest  # "linear_regression", "random_forest" or "gradient_boosting"
-
-  linear_regression_params: {}
-
+  model_type: ["random_forest", "gradient_boosting"]
   random_forest_params:
     n_estimators: 100
     max_depth: 10
     random_state: 42
-
   gradient_boosting_params:
     n_estimators: 100
     max_depth: 3
     learning_rate: 0.1
     random_state: 42
-
   use_feature_selection:
-    linear_regression: true
     random_forest: false
     gradient_boosting: false
+  relevant_metric: "test_rmse"
 

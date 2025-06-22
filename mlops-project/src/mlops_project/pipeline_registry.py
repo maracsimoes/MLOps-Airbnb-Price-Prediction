@@ -35,6 +35,7 @@ def register_pipelines() -> dict[str, Pipeline]:
             data_cleaning.create_pipeline(),
             feature_engineering.create_pipeline(),
             preprocessing.create_pipeline(),
+            feature_selection.create_pipeline(),
             preprocessing_batch.create_pipeline(),
             split_data.create_pipeline(),
             model_training.create_pipeline(),

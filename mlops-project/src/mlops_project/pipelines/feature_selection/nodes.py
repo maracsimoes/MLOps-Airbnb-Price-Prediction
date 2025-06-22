@@ -7,28 +7,37 @@ import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFE
 
-def feature_selection(X_train: pd.DataFrame, y_train: pd.DataFrame, parameters: Dict[str, Any]) -> list:
+def feature_selection(X_train: pd.DataFrame, y_train: pd.DataFrame, parameters) -> list:
     log = logging.getLogger(__name__)
     log.info(f"Starting feature selection with {len(X_train.columns)} features")
 
-    if parameters.get("feature_selection") == "rfe":
+    if parameters.get("method") == "rfe":
         y_train = np.ravel(y_train)
 
         try:
-            with open(os.path.join(os.getcwd(), 'data', '06_models', 'champion_model.pkl'), 'rb') as f:
+            with open(os.path.join(os.getcwd(), 'data', '06_models', 'fitted_rfe.pkl'), 'rb') as f:
                 classifier = pickle.load(f)
-                log.info("Loaded champion model from pickle.")
+                log.info("Loaded pre-trained from pickle.")
         except Exception as e:
             log.warning(f"Failed to load model from pickle: {e}. Creating new RandomForest.")
             classifier = RandomForestClassifier(**parameters.get('baseline_model_params', {}))
 
-        rfe = RFE(classifier)
-        rfe = rfe.fit(X_train, y_train)
+        y_train = np.ravel(y_train)
+        y_train = pd.Series(y_train, index=X_train.index)  
 
-        selected_features = X_train.columns[rfe.get_support()].tolist()
+        if len(X_train) > 10000:
+            X_train_sample = X_train.sample(10000, random_state=42)
+            y_train_sample = y_train.loc[X_train_sample.index]
+        else:
+            X_train_sample = X_train
+            y_train_sample = y_train
+
+        rfe = RFE(classifier)
+        rfe = rfe.fit(X_train_sample, y_train_sample)
+        selected_features = X_train_sample.columns[rfe.get_support()].tolist()
 
         log.info(f"Selected {len(selected_features)} features after RFE.")
-        return selected_features
+        return selected_features, classifier
 
     log.warning("No feature selection method specified or method not supported.")
-    return X_train.columns.tolist()  
+    return X_train.columns.tolist(), []
