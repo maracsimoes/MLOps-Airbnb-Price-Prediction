@@ -233,6 +233,11 @@ def ingestion(
     parameters: Dict[str, Any],
 ) -> pd.DataFrame:
     df_full = df1
+
+    target_col_config = parameters.get("target_col", {})
+    target_column = target_col_config.get("target_column", "price")  # default "price"
+    to_feature_store_flag = target_col_config.get("to_feature_store", False)
+    
     # 2. Identify feature groups
     numerical_features = (
         df_full.select_dtypes(exclude=["object", "string", "category"])
@@ -241,7 +246,7 @@ def ingestion(
     )
     categorical_features = [
         c for c in df_full.select_dtypes(include=["object", "string", "category"]).columns
-        if c != parameters["target_column"]
+        if c != target_column
     ]
 
     # 3. Add synthetic event‑time column
@@ -266,7 +271,7 @@ def ingestion(
     # 5. Slice DataFrames by group
     df_num    = df_full[["index", "datetime"] + numerical_features]
     df_cat    = df_full[["index", "datetime"] + categorical_features]
-    df_target = df_full[["index", "datetime", parameters["target_column"]]]
+    df_target = df_full[["index", "datetime", target_column]]
 
     # 6. Optional: push to Hopsworks Feature Store
     if parameters.get("to_feature_store", False):
@@ -295,14 +300,14 @@ def ingestion(
             primary_key=["index"],
             event_time="datetime",
         )
-
+        
         to_feature_store(
             data=df_target,
             group_name="target_features",
             feature_group_version=1,
             description="Target (price) for Airbnb listings",
             group_description=[
-                {"name": parameters["target_column"], "description": "Nightly price USD"}
+                {"name": target_column, "description": "Nightly price USD"}
             ],
             validation_expectation_suite=suite_target,
             credentials_input=credentials["feature_store"],

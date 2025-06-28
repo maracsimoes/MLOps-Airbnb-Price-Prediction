@@ -4,7 +4,7 @@ feature_selection:
 
 target_col:
   target_column: price
-  to_feature_store: false
+  to_feature_store: true
 
 baseline_model_params:
   n_estimators: 100
