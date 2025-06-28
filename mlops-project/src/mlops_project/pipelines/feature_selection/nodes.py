@@ -22,8 +22,14 @@ def feature_selection(X_train: pd.DataFrame, y_train: pd.DataFrame, parameters) 
             log.warning(f"Failed to load model from pickle: {e}. Creating new RandomForest.")
             classifier = RandomForestClassifier(**parameters.get('baseline_model_params', {}))
 
+        # Remove datetime columns from X_train
+        datetime_cols = X_train.select_dtypes(include=["datetime64[ns]", "datetime64"]).columns
+        if len(datetime_cols) > 0:
+            print("Dropping datetime columns from X_train:", list(datetime_cols))
+
+        X_train = X_train.drop(columns=datetime_cols)
         y_train = np.ravel(y_train)
-        y_train = pd.Series(y_train, index=X_train.index)  
+        y_train = pd.Series(y_train, index=X_train.index)
 
         if len(X_train) > 10000:
             X_train_sample = X_train.sample(10000, random_state=42)

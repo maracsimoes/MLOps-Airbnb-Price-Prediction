@@ -5,7 +5,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 
-
 def split_data_node(df, target_col='price'):
     X = df.drop(columns=[target_col])
     y = df[target_col]
@@ -13,7 +12,6 @@ def split_data_node(df, target_col='price'):
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
     return X_train, X_val, y_train.to_frame(), y_val.to_frame()
-
 
 def identify_data_types_node(df: pd.DataFrame):
     numerical = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
@@ -25,9 +23,13 @@ def identify_data_types_node(df: pd.DataFrame):
 
 def handle_missing_values_node(X_train, X_val, y_train, y_val,
                              numerical_features, categorical_features, boolean_features):
+    medians = {}
+    modes = {}
+
     # Preenche missing numéricos com mediana do train
     for col in numerical_features:
         median_val = X_train[col].median()
+        medians[col] = median_val
         X_train[col] = X_train[col].fillna(median_val)
         if col in X_val.columns:
             X_val[col] = X_val[col].fillna(median_val)
@@ -37,9 +39,12 @@ def handle_missing_values_node(X_train, X_val, y_train, y_val,
         mode_val = X_train[col].mode(dropna=True)
         if not mode_val.empty:
             mode_val = mode_val[0]
-            X_train[col] = X_train[col].fillna(mode_val)
-            if col in X_val.columns:
-                X_val[col] = X_val[col].fillna(mode_val)
+        else:
+            mode_val = None
+        modes[col] = mode_val
+        X_train[col] = X_train[col].fillna(mode_val)
+        if col in X_val.columns:
+            X_val[col] = X_val[col].fillna(mode_val)
 
     median_y = y_train.median().item()  # se for DataFrame de uma coluna só
 
@@ -49,16 +54,10 @@ def handle_missing_values_node(X_train, X_val, y_train, y_val,
     if y_val.isnull().values.any():
         y_val = y_val.fillna(median_y)
 
-
-    #print("X_train missing values before assert:")
-    #print(X_train.isnull().sum())
-    #print("X_val missing values before assert:")
-    #print(X_val.isnull().sum())
-
     assert not X_train.isnull().any().any()
     assert not X_val.isnull().any().any()
         
-    return X_train, X_val, y_train, y_val
+    return X_train, X_val, y_train, y_val, medians, modes
 
 
 

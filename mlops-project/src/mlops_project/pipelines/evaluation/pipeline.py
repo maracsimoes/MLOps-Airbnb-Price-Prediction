@@ -12,7 +12,7 @@ def create_pipeline(**kwargs):
         [
             node(
                 func=evaluate_model_node,
-                inputs=["production_model", "X_val_scaled", "y_val_imputed"],
+                inputs=["production_model", "X_val", "y_val"],
                 outputs=["val_mae", "val_rmse", "shap_figure"],
                 name="evaluate_model_node"
             )

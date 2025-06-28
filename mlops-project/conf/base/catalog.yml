@@ -2,9 +2,13 @@ listings_raw:
   type: pandas.CSVDataset
   filepath: data/01_raw/Listings_paris.csv
 
-listings_raw_extra:
-  type: pandas.CSVDataset
-  filepath: data/01_raw/Listings_paris_extra.csv
+ref_data:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/ref_data.parquet
+
+ana_data:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/ana_data.parquet
 
 features_data:
   type: pandas.ParquetDataset
@@ -25,7 +29,6 @@ y_train:
 y_val:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/y_val.parquet
-
 
 X_train_scaled:
   type: pandas.ParquetDataset
@@ -70,13 +73,53 @@ production_columns:
     type: pickle.PickleDataset
     filepath: data/06_models/production_cols.pkl
 
-preprocessed_batch_data:
+listings_preprocessed_train:
   type: kedro_datasets.pandas.ParquetDataset
-  filepath: data/03_primary/preprocessed_batch_data.parquet
+  filepath: data/03_primary/listings_preprocessed_train.parquet
+
+listings_featured_train:
+  type: kedro_datasets.pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_featured_train.parquet
+
+label_encoder:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pickle.PickleDataset
+    filepath: data/04_feature/le_encoder.pkl
+
+scaler:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pickle.PickleDataset
+    filepath: data/04_feature/scaler.pkl
+
+listings_preprocessed_batch:
+  type: kedro_datasets.pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_preprocessed_batch.parquet
+
+listings_featured_batch:
+  type: kedro_datasets.pandas.ParquetDataset
+  filepath: data/02_intermediate/listings_featured_batch.parquet
+
+batch_ready_data:
+  type: kedro_datasets.pandas.ParquetDataset
+  filepath: data/03_primary/batch_ready_data.parquet
 
 best_columns:
   type: pickle.PickleDataset
   filepath: data/06_models/best_columns.pkl
+
+input_medians:
+  type: pickle.PickleDataset
+  filepath: data/04_feature/input_medians.pkl
+
+input_modes:
+  type: pickle.PickleDataset
+  filepath: data/04_feature/input_modes.pkl
+
+pre_train_columns:
+  type: pickle.PickleDataset
+  filepath: data/05_model_input/pre_train_columns.pkl
 
 ingested_data:
   type: pandas.CSVDataset
@@ -109,3 +152,11 @@ listings_min_nights:
 listings_clean:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/listings_clean.parquet
+
+feature_medians:
+  type: pickle.PickleDataset
+  filepath: data/06_models/feature_medians.pkl
+
+feature_modes:
+  type: pickle.PickleDataset
+  filepath: data/06_models/feature_modes.pkl

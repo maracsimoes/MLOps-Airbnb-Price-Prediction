@@ -229,32 +229,9 @@ def to_feature_store(
 
 def ingestion(
     df1: pd.DataFrame,
-    df2: Optional[pd.DataFrame],          # ← df2 can be None (when @optional)
     parameters: Dict[str, Any],
 ) -> pd.DataFrame:
-    """
-    Merge two raw DataFrames, deduplicate, add a timestamp, validate with
-    Great Expectations, and (optionally) push feature groups to Hopsworks.
-
-    Expected ``parameters`` keys
-    ----------------------------
-    target_column : str   e.g. "price"
-    to_feature_store : bool
-    """
-    # 1. Merge (if extra dataset present)
-    if df2 is None:
-        logger.info("No extra dataset supplied – continuing with df1 only.")
-        df_full = df1.copy()
-    else:
-        common_cols = [c for c in df1.columns if c in df2.columns]
-        if not common_cols:
-            raise ValueError("No common columns to merge on.")
-        logger.info("Merging on common columns: %s", common_cols)
-        df_full = (
-            pd.merge(df1, df2, how="left", on=common_cols)
-            .drop_duplicates()
-        )
-
+    df_full = df1
     # 2. Identify feature groups
     numerical_features = (
         df_full.select_dtypes(exclude=["object", "string", "category"])

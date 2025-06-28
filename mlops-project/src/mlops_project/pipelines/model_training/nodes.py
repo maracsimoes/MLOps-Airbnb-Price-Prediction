@@ -4,14 +4,15 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import logging
 import mlflow
 import yaml
+import os
 import numpy as np
 import shap
 import matplotlib.pyplot as plt
-
+import copy
 logger = logging.getLogger(__name__)
 
 def model_train(X_train, X_test, y_train, y_test, parameters: dict, best_columns):
-    import copy
+
     try:
         with open('conf/local/mlflow.yml') as f:
             experiment_name = yaml.safe_load(f)['tracking']['experiment']['name']
@@ -74,7 +75,6 @@ def model_train(X_train, X_test, y_train, y_test, parameters: dict, best_columns
             logger.info(f"{model_type} - Train MAE: {train_mae:.4f}, Test MAE: {test_mae:.4f}")
             logger.info(f"{model_type} - Train RMSE: {train_rmse:.4f}, Test RMSE: {test_rmse:.4f}")
 
-        # For regression, lower RMSE/MAE is better
         score = results_dict.get(relevant_metric, None)
         if score is not None and (best_score is None or score < best_score):
             best_score = score
@@ -91,4 +91,4 @@ def model_train(X_train, X_test, y_train, y_test, parameters: dict, best_columns
             else:
                 best_plot = None
 
-    return best_model, best_features, best_results, best_plot
+    return best_model, best_features, best_results, best_plot, best_features

@@ -7,8 +7,7 @@ def create_pipeline(**_) -> pipeline:
             node(
                 func=ingestion,
                 inputs=[
-                    "listings_raw",        
-                    "listings_raw_extra",       
+                    "listings_raw",      
                     "params:target_col"],
                 outputs="ingested_data",    
                 name="ingestion",
