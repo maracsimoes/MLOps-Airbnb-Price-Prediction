@@ -22,7 +22,6 @@ def register_pipelines() -> dict[str, Pipeline]:
         #"evaluation": evaluation.create_pipeline(),
         "feature_selection": feature_selection.create_pipeline(),
         "model_predict": model_predict.create_pipeline(),
-        "model_selection": model_selection.create_pipeline(),
         "model_training": model_training.create_pipeline(),
         "preprocessing": preprocessing_train.create_pipeline(),
         "preprocessing_batch": preprocessing_batch.create_pipeline(),
